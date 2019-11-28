@@ -1,3 +1,5 @@
+import helper.DownloadThread;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -10,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+@Slf4j
 public class SpanishCourseDownloader {
 	private static final String DOWNLOAD_LOCATION = "/Users/dhruvinmehta/Languages/Spanish/";
 
@@ -42,7 +45,7 @@ public class SpanishCourseDownloader {
 			openWebPageAndWait(driver, url);
 			downloadAudioLinksFromFrame(driver);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		} finally {
 			teardown(driver);
 		}
@@ -78,8 +81,8 @@ public class SpanishCourseDownloader {
 		js.executeScript("arguments[0].setAttribute('style', 'border: 2px solid red;');", element);
 	}
 
-	private void download(String location, int number) throws Exception {
-		futures.add(executor.submit(new DownloadThread(location, DOWNLOAD_LOCATION, number)));
+	private void download(String location, int number) {
+		futures.add(executor.submit(new DownloadThread(location, DOWNLOAD_LOCATION,"Podcast - " + number + ".mp3")));
 	}
 
 	private void waitForDownloadToComplete() {
@@ -88,7 +91,7 @@ public class SpanishCourseDownloader {
 				future.get();
 			}
 		} catch(Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -99,9 +102,9 @@ public class SpanishCourseDownloader {
 		}
 
 		if(allTasksCompleted)
-			System.out.println(COMPLETE_DOWNLOAD);
+			log.info(COMPLETE_DOWNLOAD);
 		else
-			System.out.println(INCOMPLETE_DOWNLOAD);
+			log.info(INCOMPLETE_DOWNLOAD);
 	}
 
 	private void teardown(WebDriver driver) {
